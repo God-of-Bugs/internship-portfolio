@@ -1,9 +1,34 @@
-```jsx
+import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      const savedTheme = localStorage.getItem("portfolio-theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        return savedTheme;
+      }
+    } catch {
+      // Gracefully handle environments with restricted localStorage
+    }
+    return "light";
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("portfolio-theme", theme);
+    } catch {
+      // Ignore storage errors
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
+
   return (
-    <div className="portfolio">
+    <div className={`portfolio ${theme}`} data-theme={theme}>
 
       {/* Navigation */}
       <nav className="navbar">
@@ -15,6 +40,14 @@ function App() {
           <a href="#skills">Skills</a>
           <a href="#projects">Projects</a>
           <a href="#contact">Contact</a>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          >
+            {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+          </button>
         </div>
       </nav>
 
@@ -137,4 +170,3 @@ function App() {
 }
 
 export default App;
-```
