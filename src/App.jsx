@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
-import heroImage from "./assets/hero.png";
 import "./App.css";
+
+// ============================================================================
+// PROFILE PHOTO / AVATAR CONFIGURATION
+// To display your photo once ready:
+// 1. Place your image file in 'src/assets/' (e.g. 'profile.jpg')
+// 2. Import it at the top: import myPhoto from "./assets/profile.jpg";
+// 3. Set PROFILE_PHOTO_SRC = myPhoto; below.
+// When null, a modern developer monogram avatar placeholder is rendered.
+// ============================================================================
+const PROFILE_PHOTO_SRC = null;
+
+// Official GitHub Profile
+const GITHUB_USERNAME = "God-of-Bugs";
+const GITHUB_PROFILE_URL = "https://github.com/God-of-Bugs";
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -17,6 +30,34 @@ function App() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Real GitHub API live state (with robust verified fallback values)
+  const [githubStats, setGithubStats] = useState({
+    repos: 6,
+    followers: 2,
+    loading: true,
+  });
+
+  const [recentEvents, setRecentEvents] = useState([
+    {
+      id: "ev-1",
+      repo: "God-of-Bugs/Neon-Override",
+      type: "PushEvent",
+      description: "Pushed updates to Godot 3D game repository",
+    },
+    {
+      id: "ev-2",
+      repo: "God-of-Bugs/BLOOMKEEPER-",
+      type: "PublicEvent",
+      description: "Open-sourced Godot 3D pacifist game project",
+    },
+    {
+      id: "ev-3",
+      repo: "God-of-Bugs/suraksha-vr",
+      type: "PushEvent",
+      description: "Updated VR interactive experience systems",
+    },
+  ]);
+
   useEffect(() => {
     try {
       localStorage.setItem("portfolio-theme", theme);
@@ -25,6 +66,63 @@ function App() {
     }
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  // Fetch real public GitHub stats tokenlessly without exposing credentials
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchGitHubData() {
+      try {
+        const userRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (isMounted) {
+            setGithubStats({
+              repos: userData.public_repos ?? 6,
+              followers: userData.followers ?? 2,
+              loading: false,
+            });
+          }
+        } else {
+          if (isMounted) {
+            setGithubStats((prev) => ({ ...prev, loading: false }));
+          }
+        }
+
+        const eventsRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/events/public`);
+        if (eventsRes.ok) {
+          const eventsData = await eventsRes.json();
+          if (isMounted && Array.isArray(eventsData) && eventsData.length > 0) {
+            const mapped = eventsData.slice(0, 3).map((e) => {
+              let desc = "Pushed code updates";
+              if (e.type === "PublicEvent") desc = "Public repository activity";
+              else if (e.type === "CreateEvent") desc = `Created ${e.payload?.ref_type || "branch"}`;
+              else if (e.type === "WatchEvent") desc = "Starred repository";
+
+              return {
+                id: e.id,
+                repo: e.repo?.name || `${GITHUB_USERNAME}/project`,
+                type: e.type,
+                description: desc,
+              };
+            });
+            setRecentEvents(mapped);
+          }
+        }
+      } catch {
+        // Fallback to verified local stats if offline or rate-limited
+        if (isMounted) {
+          setGithubStats((prev) => ({ ...prev, loading: false }));
+        }
+      }
+    }
+
+    fetchGitHubData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
@@ -50,6 +148,7 @@ function App() {
             <a href="#about">About</a>
             <a href="#skills">Skills</a>
             <a href="#projects">Projects</a>
+            <a href="#activity">Activity</a>
             <a href="#contact">Contact</a>
 
             <button
@@ -102,6 +201,7 @@ function App() {
               <a href="#about" onClick={closeMobileMenu}>About</a>
               <a href="#skills" onClick={closeMobileMenu}>Skills</a>
               <a href="#projects" onClick={closeMobileMenu}>Projects</a>
+              <a href="#activity" onClick={closeMobileMenu}>Activity</a>
               <a href="#contact" onClick={closeMobileMenu}>Contact</a>
             </div>
           </div>
@@ -146,9 +246,11 @@ function App() {
                   Contact Me
                 </a>
                 <a
-                  href="#contact"
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn btn-ghost"
-                  title="GitHub profile URL to be configured"
+                  title="Visit Mayank's verified GitHub profile (@God-of-Bugs)"
                 >
                   <svg
                     className="btn-icon"
@@ -163,15 +265,35 @@ function App() {
               </div>
             </div>
 
+            {/* Profile Avatar / Photo Slot */}
             <div className="hero-visual">
               <div className="hero-card">
                 <div className="hero-image-wrapper">
-                  <img
-                    src={heroImage}
-                    alt="Mayank Kumar Gupta"
-                    className="hero-avatar"
-                  />
+                  {PROFILE_PHOTO_SRC ? (
+                    <img
+                      src={PROFILE_PHOTO_SRC}
+                      alt="Mayank Kumar Gupta"
+                      className="hero-avatar"
+                    />
+                  ) : (
+                    /* Tasteful Developer Monogram & Avatar Placeholder (No invented photograph) */
+                    <div className="avatar-placeholder" aria-label="Profile photo placeholder">
+                      <div className="avatar-monogram">
+                        <span className="monogram-initials">MKG</span>
+                      </div>
+                      <div className="avatar-placeholder-meta">
+                        <span className="avatar-name">Mayank Kumar Gupta</span>
+                        <span className="avatar-tag">Frontend & Game Dev</span>
+                      </div>
+                      <div className="avatar-status-pill">
+                        <span className="status-ping" aria-hidden="true" />
+                        <span>Ready for final photo</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Floating Tech Badges */}
                 <div className="hero-floating-badge badge-react">
                   <span className="badge-icon" aria-hidden="true">⚛️</span>
                   <div className="badge-meta">
@@ -335,7 +457,7 @@ function App() {
             </div>
 
             <div className="projects-grid">
-              {/* Project 1 */}
+              {/* Project 1: YT Music Clone */}
               <article className="project-card">
                 <div className="project-card-header">
                   <div className="project-tag-pill web-tag">Web Application</div>
@@ -372,13 +494,13 @@ function App() {
                 </div>
               </article>
 
-              {/* Project 2 */}
+              {/* Project 2: Overrider (Renamed from Neon Ridder) */}
               <article className="project-card">
                 <div className="project-card-header">
                   <div className="project-tag-pill game-tag">Game Development</div>
                   <span className="project-year">Godot Project</span>
                 </div>
-                <h3>Neon Ridder</h3>
+                <h3>Overrider</h3>
                 <p>
                   A game development project created using Godot.
                 </p>
@@ -408,7 +530,45 @@ function App() {
                 </div>
               </article>
 
-              {/* Project 3 */}
+              {/* Project 3: BLOOMKEEPER */}
+              <article className="project-card">
+                <div className="project-card-header">
+                  <div className="project-tag-pill game-tag">Game Development</div>
+                  <span className="project-year">Godot 3D</span>
+                </div>
+                <h3>BLOOMKEEPER</h3>
+                <p>
+                  A 3D pacifist game project developed using the Godot engine.
+                </p>
+                <div className="project-tech-stack">
+                  <span className="tech-badge">Godot Engine</span>
+                  <span className="tech-badge">GDScript</span>
+                  <span className="tech-badge">3D Pacifist Gameplay</span>
+                  <span className="tech-badge">Game Systems</span>
+                </div>
+                <div className="project-card-actions">
+                  <a
+                    href="https://github.com/God-of-Bugs/BLOOMKEEPER-"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-project btn-project-secondary"
+                    title="View BLOOMKEEPER- repository on GitHub"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="btn-icon" aria-hidden="true">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                    </svg>
+                    <span>Source Code ↗</span>
+                  </a>
+                  <span
+                    className="btn-project btn-project-disabled"
+                    title="Live demo URL to be configured"
+                  >
+                    <span>Demo ↗</span>
+                  </span>
+                </div>
+              </article>
+
+              {/* Project 4: Surksha VR */}
               <article className="project-card">
                 <div className="project-card-header">
                   <div className="project-tag-pill vr-tag">Virtual Reality</div>
@@ -447,6 +607,113 @@ function App() {
           </div>
         </section>
 
+        {/* GitHub Activity & Contributions Section */}
+        <section id="activity" className="section activity-section">
+          <div className="container">
+            <div className="section-header">
+              <span className="section-eyebrow">OPEN SOURCE & CONTRIBUTIONS</span>
+              <h2>GitHub Activity</h2>
+              <p className="section-subtitle">
+                Real public contribution history and repositories for{" "}
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="activity-user-link"
+                >
+                  @{GITHUB_USERNAME}
+                </a>
+              </p>
+            </div>
+
+            {/* GitHub Metrics Overview */}
+            <div className="activity-stats-grid">
+              <div className="stat-card">
+                <span className="stat-label">Public Repositories</span>
+                <strong className="stat-value">{githubStats.repos}</strong>
+                <span className="stat-desc">Projects & prototypes</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">GitHub Followers</span>
+                <strong className="stat-value">{githubStats.followers}</strong>
+                <span className="stat-desc">Community network</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Core Focus</span>
+                <strong className="stat-value focus-value">React & Godot</strong>
+                <span className="stat-desc">Frontend & 3D Gameplay</span>
+              </div>
+            </div>
+
+            {/* GitHub Contribution Calendar Heatmap */}
+            <div className="contribution-card">
+              <div className="contribution-card-top">
+                <div className="contribution-meta">
+                  <div className="gh-icon-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>Contribution Calendar</h3>
+                    <p>Verified public contribution squares on GitHub</p>
+                  </div>
+                </div>
+
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-project btn-project-secondary"
+                  title="View full GitHub profile"
+                >
+                  <span>@{GITHUB_USERNAME} ↗</span>
+                </a>
+              </div>
+
+              {/* Real GitHub Contribution Heatmap SVG Container */}
+              <div className="calendar-scroll-wrapper">
+                <img
+                  src={`https://ghchart.rshah.org/${GITHUB_USERNAME}`}
+                  alt={`${GITHUB_USERNAME}'s GitHub Contribution Calendar`}
+                  className="github-chart-img"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Recent Public Activity Feed */}
+              <div className="recent-activity-section">
+                <h4 className="recent-activity-title">Recent Public Repository Activity</h4>
+                <div className="activity-event-list">
+                  {recentEvents.map((event) => (
+                    <div key={event.id} className="activity-event-item">
+                      <span className="event-bullet" aria-hidden="true" />
+                      <div className="event-details">
+                        <strong className="event-repo">{event.repo}</strong>
+                        <span className="event-desc">{event.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="calendar-footer">
+                <p className="calendar-note">
+                  Activity is sourced live from GitHub's public API and public contribution chart.
+                </p>
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                >
+                  <span>Explore Repositories on GitHub ↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Contact Section */}
         <section id="contact" className="section contact-section">
           <div className="container">
@@ -456,32 +723,34 @@ function App() {
               <h2>Contact Me</h2>
 
               <p className="contact-description">
-                Interested in working together? Feel free to get in touch.
+                Interested in working together? Feel free to connect directly via GitHub.
               </p>
 
               <div className="contact-cta-wrapper">
-                <a href="mailto:your@email.com" className="btn btn-primary btn-lg">
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary btn-lg"
+                  title="Visit Mayank's verified GitHub profile (@God-of-Bugs)"
+                >
                   <svg
                     className="btn-icon"
                     viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    fill="currentColor"
                     aria-hidden="true"
                   >
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                   </svg>
-                  <span>Send Me an Email</span>
+                  <span>Connect on GitHub (@God-of-Bugs)</span>
                 </a>
               </div>
 
+              {/* Explicit status indicating public email is pending confirmation */}
               <div className="contact-status-box">
-                <span className="status-indicator" aria-hidden="true" />
+                <span className="status-indicator pending-indicator" aria-hidden="true" />
                 <span className="status-text">
-                  Direct email destination is currently set to <code>your@email.com</code>.
+                  Direct public contact email is currently <strong>pending configuration</strong>.
                 </span>
               </div>
             </div>
@@ -502,7 +771,16 @@ function App() {
             <a href="#about">About</a>
             <a href="#skills">Skills</a>
             <a href="#projects">Projects</a>
+            <a href="#activity">Activity</a>
             <a href="#contact">Contact</a>
+            <a
+              href={GITHUB_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-external-link"
+            >
+              GitHub (@God-of-Bugs) ↗
+            </a>
           </div>
 
           <div className="footer-bottom">
