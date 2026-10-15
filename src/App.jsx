@@ -10,10 +10,11 @@ const GITHUB_USERNAME = "God-of-Bugs";
 const GITHUB_PROFILE_URL = "https://github.com/God-of-Bugs";
 const BLOOMKEEPER_REPO_URL = "https://github.com/God-of-Bugs/BLOOMKEEPER-";
 
+const ROLES = ["Frontend Developer", "Godot Game Developer"];
+
 const PROFILE_DATA = {
   name: "Mayank Kumar Gupta",
   badgeInitials: "MG",
-  roleSubheading: "React Developer • Game Developer",
   shortBio:
     "B.Tech Computer Science student building responsive web applications with React and interactive 3D games with Godot Engine. Focused on practical software engineering, clean code, and engaging user experiences.",
   location: "India",
@@ -77,45 +78,52 @@ const SKILLS_CATEGORIES = [
   {
     id: "frontend",
     title: "Frontend Development",
+    shortName: "Frontend",
     iconType: "react",
     summary:
-      "Developing component-driven user interfaces, responsive layouts, and clean client-side state flow.",
+      "Developing component-driven user interfaces, responsive layouts, and clean client-side state flow using modern web standards.",
     skills: [
-      "React",
-      "JavaScript (ES6+)",
-      "HTML5",
-      "CSS3",
-      "Responsive Web Design",
-      "UI Implementation",
+      { name: "React", detail: "Component architecture, hooks, state synchronization, and modular UI structure" },
+      { name: "JavaScript (ES6+)", detail: "Modern asynchronous workflows, DOM events, fetch API, and clean syntax" },
+      { name: "HTML5", detail: "Semantic markup, accessibility landmarks, and structured document hierarchy" },
+      { name: "CSS3", detail: "Flexbox, CSS Grid, custom properties, animations, and responsive media queries" },
+      { name: "Responsive Web Design", detail: "Fluid layouts ensuring seamless presentation across desktop, tablet, and mobile" },
+      { name: "UI Implementation", detail: "Translating wireframes and design systems into pixel-polished, functional code" },
     ],
   },
   {
     id: "gamedev",
     title: "Game Development",
+    shortName: "Game Dev",
     iconType: "godot",
     summary:
-      "Building gameplay systems, scene graphs, physics-based movement, and player interactions in Godot.",
+      "Building gameplay systems, scene graphs, physics-based movement, and player interactions in Godot Engine.",
     skills: [
-      "Godot Engine",
-      "GDScript",
-      "2D/3D Gameplay Development",
-      "Gameplay Systems",
-      "UI Integration",
-      "Debugging & Testing",
+      { name: "Godot Engine", detail: "Scene architecture, node hierarchies, viewport management, and 2D/3D project setup" },
+      { name: "GDScript", detail: "Game logic scripting, signals, custom resources, and object-oriented structure" },
+      { name: "2D/3D Gameplay Development", detail: "Player movement, third-person controller mechanics, and environmental interaction" },
+      { name: "Gameplay Systems", detail: "State machines, camera orientation, collision physics, and game loop timing" },
+      { name: "UI Integration", detail: "In-game HUDs, menus, health indicators, and responsive dialogue/control overlays" },
+      { name: "Debugging & Testing", detail: "Profiling scene performance, script error diagnosis, and collision box validation" },
     ],
   },
   {
     id: "tools",
     title: "Programming & Tools",
+    shortName: "Tools",
     iconType: "code",
     summary:
       "Writing algorithmic logic, scripting utilities, version-controlling repositories, and collaborating on GitHub.",
-    skills: ["Python", "Git", "GitHub"],
+    skills: [
+      { name: "Python", detail: "Problem solving, scripting utilities, data manipulation, and clean algorithmic code" },
+      { name: "Git", detail: "Branching strategies, atomic commits, diff inspection, and local repository versioning" },
+      { name: "GitHub", detail: "Remote repository hosting, issue tracking, open-source workflow, and pull requests" },
+    ],
   },
 ];
 
 // ============================================================================
-// PROFESSIONAL VECTOR ICONS (React, Godot, Python, GitHub, UI)
+// PROFESSIONAL VECTOR ICONS
 // ============================================================================
 
 function ReactLogo({ size = 24, className = "tech-icon" }) {
@@ -230,6 +238,45 @@ function MailIcon({ size = 18, className = "mail-icon" }) {
   );
 }
 
+function CopyIcon({ size = 16, className = "copy-icon" }) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon({ size = 16, className = "check-icon" }) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 // ============================================================================
 // MAIN APPLICATION COMPONENT
 // ============================================================================
@@ -249,6 +296,19 @@ function App() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Active section tracking for navbar highlighting
+  const [activeSection, setActiveSection] = useState("home");
+
+  // Hero animated role transition state
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [isRoleFading, setIsRoleFading] = useState(false);
+
+  // Interactive skills category tab state
+  const [activeSkillCategory, setActiveSkillCategory] = useState("frontend");
+
+  // Email clipboard copy feedback state
+  const [emailCopied, setEmailCopied] = useState(false);
+
   // Live GitHub Public Statistics (no fabricated counts, no fake baseline)
   const [githubStats, setGithubStats] = useState({
     repos: null,
@@ -256,7 +316,6 @@ function App() {
     following: null,
     loading: true,
     error: false,
-    lastFetched: null,
   });
 
   // Contribution Calendar image state
@@ -274,6 +333,68 @@ function App() {
     }
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  // Animated role presentation cycle (smooth 3.5s transition)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsRoleFading(true);
+      setTimeout(() => {
+        setRoleIndex((prev) => (prev + 1) % ROLES.length);
+        setIsRoleFading(false);
+      }, 250);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Navigation active-section highlighting via IntersectionObserver
+  useEffect(() => {
+    const sectionIds = ["home", "about", "skills", "activity", "projects", "contact"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-20% 0px -50% 0px",
+        threshold: 0.1,
+      }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Section & card entrance reveal via IntersectionObserver (respects reduced-motion)
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    const elements = document.querySelectorAll(".reveal-on-scroll");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch real public GitHub statistics directly from public REST API
   const fetchGitHubStats = useCallback(async () => {
@@ -375,6 +496,38 @@ function App() {
     }, 600);
   };
 
+  // Copy email to clipboard with graceful fallback
+  const handleCopyEmail = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(CONTACT_EMAIL);
+        setEmailCopied(true);
+      } else {
+        // Fallback for browsers with restricted clipboard permission
+        const textarea = document.createElement("textarea");
+        textarea.value = CONTACT_EMAIL;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setEmailCopied(true);
+      }
+    } catch {
+      window.prompt("Copy email address:", CONTACT_EMAIL);
+    }
+  };
+
+  // Auto-reset copy feedback state after 2.5 seconds
+  useEffect(() => {
+    if (emailCopied) {
+      const timer = setTimeout(() => setEmailCopied(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [emailCopied]);
+
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   };
@@ -382,6 +535,10 @@ function App() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
+
+  // Find active category data for the interactive skills panel
+  const currentCategoryData =
+    SKILLS_CATEGORIES.find((cat) => cat.id === activeSkillCategory) || SKILLS_CATEGORIES[0];
 
   return (
     <div className={`portfolio ${theme}`} data-theme={theme}>
@@ -395,14 +552,44 @@ function App() {
             <span className="logo-text">{PROFILE_DATA.name}</span>
           </a>
 
-          {/* Centered Navigation Links */}
+          {/* Centered Navigation Links with Active Highlighting */}
           <div className="nav-links">
-            <a href="#home" className="nav-link active">Home</a>
-            <a href="#about" className="nav-link">About</a>
-            <a href="#skills" className="nav-link">Skills</a>
-            <a href="#activity" className="nav-link">Activity</a>
-            <a href="#projects" className="nav-link">Projects</a>
-            <a href="#contact" className="nav-link">Contact</a>
+            <a
+              href="#home"
+              className={`nav-link ${activeSection === "home" ? "active" : ""}`}
+            >
+              Home
+            </a>
+            <a
+              href="#about"
+              className={`nav-link ${activeSection === "about" ? "active" : ""}`}
+            >
+              About
+            </a>
+            <a
+              href="#skills"
+              className={`nav-link ${activeSection === "skills" ? "active" : ""}`}
+            >
+              Skills
+            </a>
+            <a
+              href="#activity"
+              className={`nav-link ${activeSection === "activity" ? "active" : ""}`}
+            >
+              Activity
+            </a>
+            <a
+              href="#projects"
+              className={`nav-link ${activeSection === "projects" ? "active" : ""}`}
+            >
+              Projects
+            </a>
+            <a
+              href="#contact"
+              className={`nav-link ${activeSection === "contact" ? "active" : ""}`}
+            >
+              Contact
+            </a>
           </div>
 
           {/* Theme Controls & Mobile Menu Button on Right */}
@@ -474,7 +661,7 @@ function App() {
         {/* ===================================================================
             HERO SECTION — THREE-PART COMPOSITION
             Left: Introduction & CTAs
-            Center: Circular glowing profile photo with React & Godot vector badges
+            Center: Circular glowing profile photo with interactive halo
             Right: Contact & credentials panel
            =================================================================== */}
         <section id="home" className="hero-section">
@@ -495,10 +682,14 @@ function App() {
                 <span className="hero-name gradient-text">{PROFILE_DATA.name}</span>
               </h1>
 
-              <div className="role-subheading">
-                <span className="role-text">React Developer</span>
-                <span className="role-bullet" aria-hidden="true">•</span>
-                <span className="role-text">Game Developer</span>
+              {/* Tasteful animated role presentation */}
+              <div className="role-subheading" aria-live="polite">
+                <span className="role-static-label">I build as a</span>
+                <span
+                  className={`role-animated-badge ${isRoleFading ? "fading-out" : "fading-in"}`}
+                >
+                  {ROLES[roleIndex]}
+                </span>
               </div>
 
               <p className="hero-bio">{PROFILE_DATA.shortBio}</p>
@@ -528,9 +719,9 @@ function App() {
               </div>
             </div>
 
-            {/* Center Column: Circular Profile Photo with Glowing Rings & Official Vector Badges */}
+            {/* Center Column: Circular Profile Photo with Glowing Rings & Subtle Response */}
             <div className="hero-center-profile">
-              <div className="profile-halo-container">
+              <div className="profile-halo-container" title={`${PROFILE_DATA.name} - Profile`}>
                 {/* Outer Neon Glow Rings */}
                 <div className="profile-neon-ring outer-ring" aria-hidden="true" />
                 <div className="profile-neon-ring inner-ring" aria-hidden="true" />
@@ -547,6 +738,7 @@ function App() {
                     alt={PROFILE_DATA.name}
                     className="profile-real-photo"
                   />
+                  <div className="profile-shine-overlay" aria-hidden="true" />
                 </div>
 
                 {/* Floating Bottom-Right Godot Vector Badge */}
@@ -558,21 +750,31 @@ function App() {
 
             {/* Right Column: Contact & Details Panel */}
             <div className="hero-contact-panel">
-              <div className="panel-card">
+              <div className="panel-card reveal-on-scroll">
                 <div className="panel-item">
                   <div className="panel-icon-wrap" aria-hidden="true">
                     <MailIcon size={18} />
                   </div>
                   <div className="panel-info">
                     <span className="panel-label">Email</span>
-                    {/* mailto: link WITHOUT target="_blank" so it invokes system email in-place */}
-                    <a
-                      href={`mailto:${CONTACT_EMAIL}`}
-                      className="panel-value panel-link"
-                      title={`Send email to ${CONTACT_EMAIL}`}
-                    >
-                      {CONTACT_EMAIL}
-                    </a>
+                    <div className="panel-email-row">
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="panel-value panel-link"
+                        title={`Open email client for ${CONTACT_EMAIL}`}
+                      >
+                        {CONTACT_EMAIL}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleCopyEmail}
+                        className={`panel-copy-mini-btn ${emailCopied ? "copied" : ""}`}
+                        title="Copy email to clipboard"
+                        aria-label="Copy email address"
+                      >
+                        {emailCopied ? <CheckIcon size={13} /> : <CopyIcon size={13} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -642,15 +844,16 @@ function App() {
 
         {/* ===================================================================
             ABOUT ME SECTION — FACTUAL, GROUNDED STUDENT INTRO
+            Features scroll-entrance reveal animation
            =================================================================== */}
         <section id="about" className="section standard-section">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header reveal-on-scroll">
               <span className="section-eyebrow">ABOUT ME</span>
               <h2>About Me</h2>
             </div>
 
-            <div className="section-card-box">
+            <div className="section-card-box reveal-on-scroll">
               <p className="about-lead">
                 I'm a Computer Science student who enjoys turning ideas into
                 interactive digital experiences. My work spans frontend development
@@ -699,51 +902,97 @@ function App() {
         </section>
 
         {/* ===================================================================
-            SKILLS SECTION — CATEGORIZED TOOLKIT (NO FAKE PERCENTAGES)
+            SKILLS SECTION — INTERACTIVE CATEGORY TABS INTERFACE
+            Controlled via React state, fully accessible with keyboard navigation
            =================================================================== */}
         <section id="skills" className="section standard-section">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header reveal-on-scroll">
               <span className="section-eyebrow">TECHNICAL TOOLKIT</span>
               <h2>Skills & Technologies</h2>
               <p className="section-subtitle">
-                Core technologies and tools I actively use across web and game development projects.
+                Explore the core technologies and tools I actively use across web and game development.
               </p>
             </div>
 
-            <div className="skills-three-grid">
-              {SKILLS_CATEGORIES.map((category) => (
-                <div key={category.id} className="skill-card-modern">
-                  <div className="skill-card-top">
-                    <div
-                      className={`skill-icon-wrap ${
-                        category.iconType === "react"
-                          ? "react-icon-wrap"
-                          : category.iconType === "godot"
-                          ? "godot-icon-wrap"
-                          : "tools-icon-wrap"
-                      }`}
-                      aria-hidden="true"
+            <div className="interactive-skills-container reveal-on-scroll">
+              {/* Category Navigation Tabs */}
+              <div
+                className="skills-tablist"
+                role="tablist"
+                aria-label="Skill Categories"
+              >
+                {SKILLS_CATEGORIES.map((cat) => {
+                  const isSelected = activeSkillCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      role="tab"
+                      id={`tab-${cat.id}`}
+                      aria-selected={isSelected}
+                      aria-controls={`panel-${cat.id}`}
+                      tabIndex={isSelected ? 0 : -1}
+                      onClick={() => setActiveSkillCategory(cat.id)}
+                      onKeyDown={(e) => {
+                        const ids = SKILLS_CATEGORIES.map((c) => c.id);
+                        const currentIndex = ids.indexOf(cat.id);
+                        if (e.key === "ArrowRight") {
+                          const nextId = ids[(currentIndex + 1) % ids.length];
+                          setActiveSkillCategory(nextId);
+                          document.getElementById(`tab-${nextId}`)?.focus();
+                        } else if (e.key === "ArrowLeft") {
+                          const prevId = ids[(currentIndex - 1 + ids.length) % ids.length];
+                          setActiveSkillCategory(prevId);
+                          document.getElementById(`tab-${prevId}`)?.focus();
+                        }
+                      }}
+                      className={`skills-tab-btn ${isSelected ? "active" : ""}`}
                     >
-                      {category.iconType === "react" && <ReactLogo size={24} />}
-                      {category.iconType === "godot" && <GodotLogo size={24} />}
-                      {category.iconType === "code" && <PythonLogo size={22} />}
-                    </div>
-                    <span className="skill-cat-label">{category.title.split(" ")[0]}</span>
-                  </div>
-
-                  <h3>{category.title}</h3>
-                  <p>{category.summary}</p>
-
-                  <div className="skill-chips">
-                    {category.skills.map((skillName) => (
-                      <span key={skillName} className="skill-pill">
-                        {skillName}
+                      <span className="skills-tab-icon" aria-hidden="true">
+                        {cat.iconType === "react" && <ReactLogo size={18} />}
+                        {cat.iconType === "godot" && <GodotLogo size={18} />}
+                        {cat.iconType === "code" && <PythonLogo size={16} />}
                       </span>
-                    ))}
+                      <span>{cat.title}</span>
+                      <span className="skills-count-pill">{cat.skills.length}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Tab Panel */}
+              <div
+                key={currentCategoryData.id}
+                role="tabpanel"
+                id={`panel-${currentCategoryData.id}`}
+                aria-labelledby={`tab-${currentCategoryData.id}`}
+                className="skills-tabpanel fade-in-panel"
+              >
+                <div className="panel-summary-bar">
+                  <div className="panel-summary-icon" aria-hidden="true">
+                    {currentCategoryData.iconType === "react" && <ReactLogo size={28} />}
+                    {currentCategoryData.iconType === "godot" && <GodotLogo size={28} />}
+                    {currentCategoryData.iconType === "code" && <PythonLogo size={26} />}
+                  </div>
+                  <div>
+                    <h3 className="panel-summary-title">{currentCategoryData.title}</h3>
+                    <p className="panel-summary-desc">{currentCategoryData.summary}</p>
                   </div>
                 </div>
-              ))}
+
+                <div className="skills-items-grid">
+                  {currentCategoryData.skills.map((skill) => (
+                    <div key={skill.name} className="skill-detail-card">
+                      <div className="skill-header">
+                        <span className="skill-bullet-dot" aria-hidden="true" />
+                        <h4 className="skill-item-name">{skill.name}</h4>
+                      </div>
+                      <p className="skill-item-detail">{skill.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -754,7 +1003,7 @@ function App() {
            =================================================================== */}
         <section id="activity" className="section standard-section activity-section">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header reveal-on-scroll">
               <span className="section-eyebrow">OPEN SOURCE & CONTRIBUTIONS</span>
               <h2>GitHub Activity</h2>
               <p className="section-subtitle">
@@ -762,7 +1011,7 @@ function App() {
               </p>
             </div>
 
-            <div className="gh-activity-full-card">
+            <div className="gh-activity-full-card reveal-on-scroll">
               {/* Activity Card Header */}
               <div className="gh-activity-header">
                 <div className="gh-header-title-wrap">
@@ -929,7 +1178,7 @@ function App() {
            =================================================================== */}
         <section id="projects" className="section standard-section projects-section">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header reveal-on-scroll">
               <span className="section-eyebrow">PORTFOLIO WORK</span>
               <h2>Featured Projects</h2>
               <p className="section-subtitle">
@@ -940,7 +1189,7 @@ function App() {
             {/* Responsive Projects Grid */}
             <div className="featured-projects-grid">
               {FEATURED_PROJECTS.map((project) => (
-                <article key={project.id} className="project-feature-card">
+                <article key={project.id} className="project-feature-card reveal-on-scroll">
                   {/* Distinctive Visual Header Banner */}
                   <div className={`project-banner ${project.bannerTheme}`}>
                     <div className="banner-glow-effect" aria-hidden="true" />
@@ -1024,11 +1273,13 @@ function App() {
         </section>
 
         {/* ===================================================================
-            CONTACT SECTION
+            CONTACT SECTION — REDESIGNED TWO-ACTION INTERACTION
+            Action 1: Copy Email (instant clipboard with reliable fallback & feedback)
+            Action 2: Open Email App (clean mailto: without target="_blank")
            =================================================================== */}
         <section id="contact" className="section standard-section">
           <div className="container">
-            <div className="contact-full-card">
+            <div className="contact-full-card reveal-on-scroll">
               <div className="contact-top-icon" aria-hidden="true">
                 <MailIcon size={36} />
               </div>
@@ -1037,20 +1288,39 @@ function App() {
 
               <p className="contact-main-desc">
                 Interested in discussing a project, collaboration, or learning more about my work?
-                Feel free to send an email or connect through GitHub.
+                Feel free to copy my direct email or launch your email client.
               </p>
 
-              <div className="contact-btn-row">
-                {/* Invokes system mailto handler in-place (NO target="_blank") */}
+              {/* Verified Direct Email Badge with 1-click Copy */}
+              <div className="contact-address-display">
+                <span className="contact-address-label">Direct Address:</span>
+                <code className="contact-email-code">{CONTACT_EMAIL}</code>
+              </div>
+
+              {/* Two Primary Contact Actions */}
+              <div className="contact-btn-row" aria-live="polite">
+                {/* Action 1: Copy Email Button with temporal feedback */}
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className={`btn ${emailCopied ? "btn-copied" : "btn-primary-gradient"} btn-lg`}
+                  aria-label="Copy email address to clipboard"
+                >
+                  {emailCopied ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
+                  <span>{emailCopied ? "Email Copied!" : "Copy Email"}</span>
+                </button>
+
+                {/* Action 2: Open Email App (Clean mailto without target="_blank") */}
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="btn btn-primary-gradient btn-lg"
-                  title={`Send email to ${CONTACT_EMAIL}`}
+                  className="btn btn-dark-pill btn-lg"
+                  title={`Launch default email application for ${CONTACT_EMAIL}`}
                 >
                   <MailIcon size={18} />
-                  <span>{CONTACT_EMAIL}</span>
+                  <span>Open Email App</span>
                 </a>
 
+                {/* Secondary Action: Connect on GitHub */}
                 <a
                   href={GITHUB_PROFILE_URL}
                   target="_blank"
@@ -1059,7 +1329,7 @@ function App() {
                   title="Open GitHub profile in a new tab"
                 >
                   <OctocatIcon size={18} />
-                  <span>Connect on GitHub</span>
+                  <span>GitHub Profile ↗</span>
                 </a>
               </div>
             </div>
@@ -1074,7 +1344,7 @@ function App() {
             <a href="#home" className="footer-logo">
               {PROFILE_DATA.name}
             </a>
-            <p className="footer-tagline">{PROFILE_DATA.roleSubheading}</p>
+            <p className="footer-tagline">React Developer • Game Developer</p>
           </div>
 
           <div className="footer-nav">
