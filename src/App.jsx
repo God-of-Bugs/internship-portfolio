@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import mayankProfile from "./assets/mayank-profile.jpg";
+import mayankProfile from "./assets/mayank-profile.webp";
 import "./App.css";
 
 // ============================================================================
