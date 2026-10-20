@@ -1032,21 +1032,21 @@ function App() {
                     onClick={handleManualRefresh}
                     disabled={isRefreshing}
                     className={`btn-gh-refresh ${isRefreshing ? "refreshing" : ""}`}
-                    title="Refresh live activity from GitHub"
-                    aria-label="Refresh GitHub data"
+                    title="Check for GitHub updates and sync public metrics"
+                    aria-label="Sync GitHub activity data"
                   >
                     <span className="refresh-symbol" aria-hidden="true">↻</span>
-                    <span>{isRefreshing ? "Refreshing..." : "Refresh"}</span>
+                    <span>{isRefreshing ? "Syncing..." : "Sync Activity"}</span>
                   </button>
 
                   <a
-                    href={GITHUB_PROFILE_URL}
+                    href={`${GITHUB_PROFILE_URL}?tab=overview`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-dark-pill btn-sm"
-                    title="Visit profile on GitHub"
+                    title="View live interactive contribution calendar on GitHub"
                   >
-                    <span>View Profile ↗</span>
+                    <span>Live on GitHub ↗</span>
                   </a>
                 </div>
               </div>
@@ -1164,8 +1164,9 @@ function App() {
               <div className="gh-card-footnote">
                 <span className="footnote-dot" aria-hidden="true" />
                 <span>
-                  Contribution graph reflects public commits on GitHub. Graph proxy refreshes
-                  periodically; freshly pushed commits typically appear within a few hours.
+                  Contribution graph mirrors public activity published by GitHub. Upstream graph caches sync
+                  periodically; commits to private repositories appear if private contributions are enabled in
+                  GitHub profile settings.
                 </span>
               </div>
             </div>
